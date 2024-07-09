@@ -7,6 +7,7 @@ WORKDIR /app
 # Copy only the requirements file 
 COPY api/requirements.txt .
 
+ENV PIP_DEFAULT_TIMEOUT=100
 # Install  dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
