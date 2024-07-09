@@ -1,0 +1,32 @@
+version: '3'
+services:
+  api:
+   build: .
+   container_name: flask_api
+   environment:
+    MINIO_ACCESS_KEY: "minioadmin"
+    MINIO_SECRET_KEY: "minioadmin"
+   ports:
+    - "5000:5000"
+   depends_on:
+    -minio
+   networks:
+    -minio_network
+  minio:
+   image: minio/minio
+   container_name: minio
+   environment:
+    MINIO_ACCESS_KEY: "minioadmin"
+    MINIO_SECRET_KEY: "minioadmin"
+   volumes:
+    -minio_data:/minio_data
+   command: server /data
+   ports:
+    - "9000:9000"
+   networks:
+    -minio_network
+volumes:
+  minio_data:
+
+networks:
+  minio_network:
