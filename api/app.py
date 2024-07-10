@@ -16,7 +16,6 @@ minio_client = Minio(
 
 bucket_name = "mybucket"
 
-
 @app.route('/store', methods=['POST'])
 def store():
     data = request.json
@@ -47,3 +46,4 @@ if __name__ == "__main__":
     if not minio_client.bucket_exists(bucket_name):
         minio_client.make_bucket(bucket_name)
     app.run(host='0.0.0.0', port=5000)
+
