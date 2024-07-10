@@ -2,52 +2,38 @@ from flask import Flask, request, jsonify
 from minio import Minio
 from minio.error import S3Error
 import os
-import base64
+import io
 
 app = Flask(__name__)
 
 minio_client = Minio(
     "minio:9000",
-    access_key=os.getenv('MINIO_ACCESS_KEY'),
-    secret_key=os.getenv('MINIO_SECRET_KEY'),
+    access_key=os.getenv('MINIO_ACCESS_KEY', 'minioadmin'),
+    secret_key=os.getenv('MINIO_SECRET_KEY', 'minioadmin'),
     secure=False
 )
 
 bucket_name = "mybucket"
 
 @app.route('/upload', methods=['POST'])
-def upload_file():
+def upload():
+    if 'file' not in request.files:
+        return jsonify({"error": "No file part in the request"}), 400
+
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+
     try:
-        data = request.get_json()
-        file_name = data.get("file_name")
-        file_content_base64 = data.get("file_content")
-
-        if not file_name or not file_content_base64:
-            return jsonify({"error": "Missing file_name or file_content"}), 400
-
-        # Decode the Base64 content
-        file_content = base64.b64decode(file_content_base64)
-        file_size = len(file_content)
-
-        # Save the file to a temporary location
-        temp_file_path = f"/tmp/{file_name}"
-        with open(temp_file_path, 'wb') as temp_file:
-            temp_file.write(file_content)
+        # Convert file to bytes and get its size
+        file_bytes = file.read()
+        file_size = len(file_bytes)
+        file_stream = io.BytesIO(file_bytes)
 
         # Upload to MinIO
-        with open(temp_file_path, 'rb') as temp_file:
-            minio_client.put_object(
-                bucket_name, file_name, temp_file, file_size
-            )
-        
-        # Remove the temporary file
-        os.remove(temp_file_path)
-
+        minio_client.put_object(bucket_name, file.filename, file_stream, file_size)
         return jsonify({"message": "File uploaded successfully"}), 200
-
     except S3Error as e:
-        return jsonify({"error": str(e)}), 500
-    except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
