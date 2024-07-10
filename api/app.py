@@ -17,7 +17,7 @@ bucket_name = "mybucket"
 
 @app.route('/store', methods=['POST'])
 def store():
-    data = request.json
+    data = request.json()
     
     try:
         object_name = data.get("name")
