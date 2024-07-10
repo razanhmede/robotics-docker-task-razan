@@ -1,3 +1,8 @@
+**Asssignment2 docker**
+This is the assignment for session3 where both minIO and a flask app were set up and using docker compose we run then in a container.
+The answers to questions.md were also included under answers.md.
+
+
 **New commands in docker-compose.yml:**
 
 "healthcheck":does a health check for the 'minio' service 
