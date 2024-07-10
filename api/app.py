@@ -6,9 +6,8 @@ import io
 
 app = Flask(__name__)
 
-# Initialize MinIO client
 minio_client = Minio(
-    "minio:9000",  # MinIO server address
+    "minio:9000",
     access_key=os.getenv('MINIO_ACCESS_KEY'),
     secret_key=os.getenv('MINIO_SECRET_KEY'),
     secure=False
@@ -23,27 +22,25 @@ def store():
     try:
         object_name = data.get("name")
         content = data.get("content")
-
-        # Check if content is a file path
+        
+        # Check if the content is a path or a text
         if os.path.isfile(content):
-            with open(content, 'rb') as file_data:
-                # Upload file using fput_object
-                minio_client.fput_object(bucket_name, object_name, file_data)
-                return jsonify({"message": "File uploaded successfully"}), 200
+            # If content is a file path
+            with open(content, 'rb') as f:
+                minio_client.put_object(bucket_name, object_name, f, os.stat(content).st_size)
         else:
-            # Assuming content is a text or bytes-like object
+            # If content is text data
             content_bytes = content.encode('utf-8')
             content_stream = io.BytesIO(content_bytes)
-            # Upload file using put_object
-            minio_client.put_object(bucket_name, object_name, content_stream, len(content))
-            return jsonify({"message": "Data uploaded successfully"}), 200
-
+            minio_client.put_object(bucket_name, object_name, content_stream, len(content_bytes))
+        
+        return jsonify({"message": "Data stored successfully"}), 200
     except S3Error as e:
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    # Ensure the bucket exists before starting the server
     if not minio_client.bucket_exists(bucket_name):
         minio_client.make_bucket(bucket_name)
     app.run(host='0.0.0.0', port=5000)
+
 
