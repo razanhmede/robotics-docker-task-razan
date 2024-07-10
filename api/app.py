@@ -39,4 +39,4 @@ def store():
 if __name__ == "__main__":
     if not minio_client.bucket_exists(bucket_name):
         minio_client.make_bucket(bucket_name)
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='localhost', port=5000)
