@@ -1,4 +1,5 @@
 **New commands in docker-compose.yml:**
+
 "healthcheck":does a health check for the 'minio' service 
        -test: uses curl command to check the Minio health endpoint 
        -interval: each 30 seconds we perform the health check
