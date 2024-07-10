@@ -30,8 +30,7 @@ EXPOSE 5000
 # Set environment variables
 ENV FLASK_APP=app.py
 ENV FLASK_RUN_HOST=0.0.0.0
-ENV MINIO_ACCESS_KEY=access-key
-ENV MINIO_SECRET_KEY=secret-key
+
 
 # Command to run the Flask application
 CMD ["python", "app.py"]

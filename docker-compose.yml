@@ -5,8 +5,8 @@ services:
     build: .
     container_name: flask_api
     environment:
-      MINIO_ACCESS_KEY: "minioadmin"
-      MINIO_SECRET_KEY: "minioadmin"
+      MINIO_ROOT_USER: "minioadmin"
+      MINIO_ROOT_PASSWORD: "minioadmin"
     ports:
       - "5000:5000"
     depends_on:
@@ -17,14 +17,14 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:5000"]
       interval: 30s
       timeout: 10s
-      retries: 3
+      retries: 5
 
   minio:
     image: minio/minio
     container_name: minio
     environment:
-      MINIO_ACCESS_KEY: "minioadmin"
-      MINIO_SECRET_KEY: "minioadmin"
+      MINIO_ROOT_USER: "minioadmin"
+      MINIO_ROOT_PASSWORD: "minioadmin"
     volumes:
       - minio_data:/data
     command: server /data
@@ -36,7 +36,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 30s
       timeout: 10s
-      retries: 3
+      retries: 5
 
 volumes:
   minio_data:
@@ -44,4 +44,3 @@ volumes:
 networks:
   app-network:
     driver: bridge
-
