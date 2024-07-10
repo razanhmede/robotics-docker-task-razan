@@ -6,7 +6,7 @@ data = {
 }
 
 # Send the POST request to the Flask server
-response = requests.post('http://localhost:5000/store', json=data)
+response = requests.post("http://localhost:5000/store", json=data)
 
 # Check the response status
 print(f"Response Status Code: {response.status_code}")
