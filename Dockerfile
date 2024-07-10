@@ -5,7 +5,7 @@ FROM python:3.9-slim as build
 WORKDIR /app
 
 # Copy  
-COPY .api/ .
+COPY ./api/ .
 
 ENV PIP_DEFAULT_TIMEOUT=100
 # Install  dependencies
@@ -22,7 +22,7 @@ COPY --from=build /usr/local/lib/python3.9/site-packages /usr/local/lib/python3.
 COPY --from=build /usr/local/bin /usr/local/bin
 
 # Copy the rest of the application code
-COPY .api/ .
+COPY ./api/ .
 
 # Expose port 5000 for the Flask application
 EXPOSE 5000
