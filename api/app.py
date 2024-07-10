@@ -17,23 +17,40 @@ bucket_name = "mybucket"
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
-    data = request.get_json()
-    if not data or 'file_name' not in data or 'file_content' not in data:
-        return jsonify({"error": "Invalid request"}), 400
-    
-    file_name = data['file_name']
-    file_content = base64.b64decode(data['file_content'])
-
     try:
-        if not minio_client.bucket_exists(bucket_name):
-            minio_client.make_bucket(bucket_name)
+        data = request.get_json()
+        file_name = data.get("file_name")
+        file_content_base64 = data.get("file_content")
+
+        if not file_name or not file_content_base64:
+            return jsonify({"error": "Missing file_name or file_content"}), 400
+
+        # Decode the Base64 content
+        file_content = base64.b64decode(file_content_base64)
+        file_size = len(file_content)
+
+        # Save the file to a temporary location
+        temp_file_path = f"/tmp/{file_name}"
+        with open(temp_file_path, 'wb') as temp_file:
+            temp_file.write(file_content)
+
+        # Upload to MinIO
+        with open(temp_file_path, 'rb') as temp_file:
+            minio_client.put_object(
+                bucket_name, file_name, temp_file, file_size
+            )
         
-        minio_client.put_object(bucket_name, file_name, file_content, len(file_content))
+        # Remove the temporary file
+        os.remove(temp_file_path)
+
         return jsonify({"message": "File uploaded successfully"}), 200
+
     except S3Error as e:
+        return jsonify({"error": str(e)}), 500
+    except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
+    if not minio_client.bucket_exists(bucket_name):
+        minio_client.make_bucket(bucket_name)
     app.run(host='0.0.0.0', port=5000)
-
-
