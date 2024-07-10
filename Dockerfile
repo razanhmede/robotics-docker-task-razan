@@ -4,15 +4,15 @@ FROM python:3.9-slim as build
 # Set the working directory
 WORKDIR /app
 
-# Copy only the requirements file 
-COPY api/requirements.txt .
+# Copy  
+COPY .api/ .
 
 ENV PIP_DEFAULT_TIMEOUT=100
 # Install  dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Stage 2
-FROM python:3.9-slim
+# Stage 2 as production stage
+FROM python:3.9-slim as production
 
 # Set the working directory
 WORKDIR /app
@@ -22,7 +22,7 @@ COPY --from=build /usr/local/lib/python3.9/site-packages /usr/local/lib/python3.
 COPY --from=build /usr/local/bin /usr/local/bin
 
 # Copy the rest of the application code
-COPY api/ .
+COPY .api/ .
 
 # Expose port 5000 for the Flask application
 EXPOSE 5000
@@ -30,8 +30,10 @@ EXPOSE 5000
 # Set environment variables
 ENV FLASK_APP=app.py
 ENV FLASK_RUN_HOST=0.0.0.0
+ENV MINIO_ACCESS_KEY=access-key
+ENV MINIO_SECRET_KEY=secret-key
 
 # Command to run the Flask application
-CMD ["flask", "run"]
+CMD ["python", "app.py"]
 
 
